@@ -1,5 +1,7 @@
 package guru.springframework.msscssm.services;
 
+import javax.transaction.Transactional;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
@@ -29,31 +31,34 @@ public class PaymentServiceImpl implements PaymentService {
 		return paymentRepository.save(payment);
 	}
 
+	@Transactional // to avoid org.hibernate.LazyInitializationException: could not initialize proxy exception 
 	@Override
 	public StateMachine<PaymentState, PaymentEvent> preAuth(Long paymentId) {
 		StateMachine<PaymentState, PaymentEvent> sm = build(paymentId);
 		
-		sendEvent(paymentId, sm, PaymentEvent.PRE_AUTHORIZE);
+		sendEvent(paymentId, sm, PaymentEvent.PRE_AUTH_APPROVED);
 		
-		return null;
+		return sm;
 	}
 
+	@Transactional
 	@Override
 	public StateMachine<PaymentState, PaymentEvent> authorizePayment(Long paymentId) {
 		StateMachine<PaymentState, PaymentEvent> sm = build(paymentId);
 		
 		sendEvent(paymentId, sm, PaymentEvent.AUTH_APPROVED);
 		
-		return null;
+		return sm;
 	}
 
+	@Transactional
 	@Override
 	public StateMachine<PaymentState, PaymentEvent> declineAuth(Long paymentId) {
 		StateMachine<PaymentState, PaymentEvent> sm = build(paymentId);
 		
 		sendEvent(paymentId, sm, PaymentEvent.AUTH_DECLINED);
 		
-		return null;
+		return sm;
 	}
 	
 	private void sendEvent(Long paymentId, StateMachine<PaymentState, PaymentEvent> sm, PaymentEvent event) {
