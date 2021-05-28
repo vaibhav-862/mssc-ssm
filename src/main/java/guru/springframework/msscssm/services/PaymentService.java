@@ -1,4 +1,4 @@
-package guru.springframework.msscssm.service;
+package guru.springframework.msscssm.services;
 
 import org.springframework.statemachine.StateMachine;
 
